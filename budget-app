@@ -1,0 +1,104 @@
+class Category:
+    def __init__(self, name):
+        self.name = name
+        self.balance = 0
+        self.ledger = []
+    def deposit(self, amount_d, description_d = None):
+        amount = amount_d
+        if description_d == None:
+            description = '""'
+        else:
+            description = '"' + description_d + "'"
+        self.ledger.append({"amount": amount, "description": description})
+        self.balance += amount
+
+    def withdraw(self, amount_w, description_w = None):
+        amount = -(amount_w)
+        balance = self.balance
+        if amount_w > balance:
+            return False
+        else:
+            if description_w == None:
+                description = '""'
+                self.ledger.append({"amount": amount, "description": description})
+                self.balance += amount
+            else:
+                description = description_w
+                self.ledger.append({"amount": amount, "description": description})
+                self.balance += amount
+            return True
+
+    def get_balance(self):
+        return self.balance
+
+    def transfer(self, amount_t, other_cat):
+        balance = self.balance
+        name = self.name
+        if amount_t > balance:
+            return False
+        else:
+            self.balance -= amount_t
+            self.ledger.append({"amount": amount_t, "description": f"Transfer to {other_cat.name}"})
+            other_cat.deposit(amount_t,f"Transfer from {name}")
+            return True
+
+
+    def check_funds(self,amount_check):
+        if amount_check > self.balance:
+            return False
+        else:
+            return True
+
+    def __str__(self):
+        word_length = len(self.name)
+        if word_length % 2 == 0:
+            lspace = (30 - word_length) / 2
+            rspace = (30 - word_length) / 2
+        else:
+            lspace = (30 - word_length) / 2 - 0.5
+            rspace = (30 - word_length) / 2 + 0.5
+        output = int(lspace) * '*' + self.name + int(rspace) * '*' + "\n"
+        for i in self.ledger:
+            output = output + ((str(i["description"]))[:23]).ljust(23)
+            output = output + (str("%.2f" % float(i["amount"]))[0:7]).rjust(7) + "\n"
+        output = output + "Total: " + str("%0.2f" % float(self.get_balance()))
+        return output
+
+def create_spend_chart(categories):
+    graph_name = "Percentage spent by category"
+    grand_total = 0
+    percents = []
+
+    for x in categories:
+        grand_total = grand_total + x.balance
+
+    for y in categories:
+        percents.append(int((100*y.balance/grand_total)//10)*10)
+
+    for z in range(11):
+        graph_name = graph_name + "\n" + (str(100-10*z)).rjust(3) + "|"
+        for j in percents:
+            if j>=(100-10*z):
+                graph_name = graph_name + " o "
+            else:
+                graph_name = graph_name + "   "
+        graph_name = graph_name + " "
+    graph_name = graph_name + "\n" + "    " + len(categories)*3*"-" + "-" + "\n"
+
+    max_length = ""
+    for i in categories:
+        if len(i.name) > len(max_length):
+            max_length = i.name
+
+    for j in range(len(max_length)):
+        graph_name = graph_name + "     "
+        for y in categories:
+            try:
+                graph_name = graph_name + y.name[j] + "  "
+            except:
+                graph_name = graph_name + "   "
+        graph_name = graph_name + "\n"
+
+    graph_name = graph_name[:-1]
+
+    return graph_name
